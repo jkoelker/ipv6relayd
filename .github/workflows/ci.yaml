@@ -1,0 +1,152 @@
+---
+name: CI
+
+"on":
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  DOCKER_BUILDKIT: "1"
+  CONTAINER_TOOL: docker
+
+jobs:
+  devkit:
+    name: Build devkit image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
+      - name: Build devkit image
+        uses: docker/build-push-action@v6
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: Containerfile.devkit
+          tags: ipv6relayd-devkit:local
+          outputs: type=docker,dest=/tmp/devkit.tar,compression=zstd
+          cache-from: type=gha,scope=devkit
+          cache-to: type=gha,scope=devkit,mode=max
+
+      - name: Upload devkit image
+        uses: actions/upload-artifact@v4
+        with:
+          name: devkit-image
+          path: /tmp/devkit.tar
+          retention-days: 1
+
+  lint:
+    name: Lint
+    needs: devkit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download devkit image
+        uses: actions/download-artifact@v4
+        with:
+          name: devkit-image
+          path: /tmp
+
+      - name: Load devkit image
+        run: docker load -i /tmp/devkit.tar
+
+      - name: Lint
+        run: make lint
+
+      - name: Ensure lint produced no diff
+        run: |
+          if ! git diff --quiet; then
+            echo "\nmake lint produced changes. Please run 'make lint' " \
+                 "locally and commit the fixes." >&2
+            exit 1
+          fi
+
+  unit-tests:
+    name: Unit tests
+    needs: devkit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download devkit image
+        uses: actions/download-artifact@v4
+        with:
+          name: devkit-image
+          path: /tmp
+
+      - name: Load devkit image
+        run: docker load -i /tmp/devkit.tar
+
+      - name: Unit tests
+        run: make test
+
+  integration-tests:
+    name: Integration tests
+    needs: devkit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download devkit image
+        uses: actions/download-artifact@v4
+        with:
+          name: devkit-image
+          path: /tmp
+
+      - name: Load devkit image
+        run: podman load -i /tmp/devkit.tar
+
+      - name: Integration tests
+        run: make integration
+        env:
+          CONTAINER_TOOL: podman
+
+  container-build:
+    name: Build container image
+    needs:
+      - lint
+      - unit-tests
+      - integration-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
+      - name: Build Containerfile
+        uses: docker/build-push-action@v6
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: Containerfile
+          push: false
+          cache-from: type=gha,scope=container
+          cache-to: type=gha,scope=container,mode=max

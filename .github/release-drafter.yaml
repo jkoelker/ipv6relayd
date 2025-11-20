@@ -1,0 +1,90 @@
+---
+name-template: v$RESOLVED_VERSION
+tag-template: v$RESOLVED_VERSION
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
+change-title-escapes: '\<>/'
+
+version-resolver:
+  major:
+    labels:
+      - breaking
+      - semver:major
+  minor:
+    labels:
+      - enhancement
+      - feature
+      - semver:minor
+  patch:
+    labels:
+      - bug
+      - bugfix
+      - fix
+      - semver:patch
+      - chore
+      - maintenance
+  default: patch
+
+categories:
+  - title: 🚨 Breaking Changes
+    labels:
+      - breaking
+      - semver:major
+  - title: ✨ Features
+    labels:
+      - enhancement
+      - feature
+      - semver:minor
+  - title: 🐛 Fixes
+    labels:
+      - bug
+      - bugfix
+      - fix
+      - semver:patch
+  - title: 🧰 Maintenance
+    labels:
+      - chore
+      - maintenance
+      - refactor
+      - dependencies
+  - title: 📖 Documentation
+    labels:
+      - docs
+      - documentation
+  - title: 🧪 Testing
+    labels:
+      - test
+      - testing
+
+template: |
+  ## Changes
+  $CHANGES
+
+  ## Contributors
+  $CONTRIBUTORS
+
+autolabeler:
+  - label: docs
+    files:
+      - docs/**
+      - README.md
+  - label: test
+    files:
+      - integration/**
+      - '**/*_test.go'
+  - label: maintenance
+    files:
+      - Containerfile*
+      - Makefile
+      - '.github/**'
+  - label: enhancement
+    title:
+      - '/feat/i'
+      - '/feature/i'
+  - label: bug
+    title:
+      - '/fix/i'
+      - '/bug/i'
+
+replacers:
+  - search: '/\s+\(#(\d+)\)/g'
+    replace: ' (#$1)'

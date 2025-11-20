@@ -1,0 +1,32 @@
+#
+
+FROM docker.io/golangci/golangci-lint:v2.6.2 AS golangci-lint
+FROM docker.io/library/golang:1.25.4
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+#hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      build-essential \
+      git \
+      systemd \
+      dbus \
+      iproute2 \
+      iputils-ping \
+      procps \
+      tcpdump \
+      libpcap-dev \
+      pkg-config \
+      ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Allow git inside the devkit container to read the mounted workspace owned by the host user.
+RUN git config --system --add safe.directory /workspace
+
+COPY --from=golangci-lint /usr/bin/golangci-lint /usr/local/bin/golangci-lint
+
+WORKDIR /workspace
+
+COPY go.mod go.sum ./
+RUN go mod download
