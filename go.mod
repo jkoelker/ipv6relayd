@@ -7,7 +7,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/insomniacslk/dhcp v0.0.0-20251020182700-175e84fbb167
-	github.com/knadh/koanf/parsers/json v0.1.0
+	github.com/knadh/koanf/parsers/json v1.0.0
 	github.com/knadh/koanf/parsers/yaml v0.1.0
 	github.com/knadh/koanf/providers/file v0.1.0
 	github.com/knadh/koanf/v2 v2.3.0
