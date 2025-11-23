@@ -1,10 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"github.com/jkoelker/ipv6relayd/cmd/ipv6relayd/commands"
 )
@@ -16,7 +17,7 @@ const (
 )
 
 func main() {
-	app := &cli.App{
+	cmd := &cli.Command{
 		Name:            "ipv6relayd",
 		Usage:           "IPv6 relay daemon",
 		HideHelpCommand: true,
@@ -39,7 +40,7 @@ func main() {
 		},
 	}
 
-	if err := app.Run(os.Args); err != nil {
+	if err := cmd.Run(context.Background(), os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(exitFailure)
 	}

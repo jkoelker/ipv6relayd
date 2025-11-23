@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"github.com/jkoelker/ipv6relayd/pkg/config"
 	"github.com/jkoelker/ipv6relayd/pkg/daemon"
@@ -49,7 +49,7 @@ func Run() *cli.Command {
 				Usage: "Name of a downstream interface (repeat flag for multiple)",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			opts := RunOptions{
 				ConfigPath:  c.String("config"),
 				LogLevel:    c.String("log-level"),
@@ -57,7 +57,7 @@ func Run() *cli.Command {
 				Downstreams: c.StringSlice("downstream"),
 			}
 
-			if err := runDaemon(opts); err != nil {
+			if err := runDaemon(ctx, opts); err != nil {
 				return cli.Exit(err.Error(), exitFailure)
 			}
 
@@ -66,7 +66,7 @@ func Run() *cli.Command {
 	}
 }
 
-func runDaemon(opts RunOptions) error {
+func runDaemon(ctx context.Context, opts RunOptions) error {
 	level, err := parseLevel(opts.LogLevel)
 	if err != nil {
 		return fmt.Errorf("invalid log level %q: %w", opts.LogLevel, err)
@@ -95,7 +95,7 @@ func runDaemon(opts RunOptions) error {
 		return fmt.Errorf("load config: %w", err)
 	}
 
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	runCtx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	relayDaemon, err := daemon.New(cfg, logger)
@@ -105,7 +105,7 @@ func runDaemon(opts RunOptions) error {
 		return fmt.Errorf("init daemon: %w", err)
 	}
 
-	if err := relayDaemon.Run(ctx); err != nil && !errors.Is(err, context.Canceled) {
+	if err := relayDaemon.Run(runCtx); err != nil && !errors.Is(err, context.Canceled) {
 		logger.Error("daemon stopped unexpectedly", "err", err)
 
 		return fmt.Errorf("run daemon: %w", err)

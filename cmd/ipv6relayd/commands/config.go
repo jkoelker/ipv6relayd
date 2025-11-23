@@ -1,10 +1,11 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"sigs.k8s.io/yaml"
 
 	"github.com/jkoelker/ipv6relayd/pkg/config"
@@ -16,11 +17,11 @@ func Config() *cli.Command {
 	return &cli.Command{
 		Name:  "config",
 		Usage: "Configuration helpers",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			{
 				Name:  "default",
 				Usage: "Print a sample configuration (YAML)",
-				Action: func(_ *cli.Context) error {
+				Action: func(_ context.Context, _ *cli.Command) error {
 					if err := printDefaultConfig(os.Stdout); err != nil {
 						return cli.Exit(err.Error(), exitFailure)
 					}
@@ -38,7 +39,7 @@ func Config() *cli.Command {
 						Usage: "Output path for the sample configuration",
 					},
 				},
-				Action: func(c *cli.Context) error {
+				Action: func(_ context.Context, c *cli.Command) error {
 					if err := writeDefaultConfig(c.String("out")); err != nil {
 						return cli.Exit(err.Error(), exitFailure)
 					}
