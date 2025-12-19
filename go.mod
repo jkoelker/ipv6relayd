@@ -9,7 +9,7 @@ require (
 	github.com/insomniacslk/dhcp v0.0.0-20251020182700-175e84fbb167
 	github.com/knadh/koanf/parsers/json v1.0.0
 	github.com/knadh/koanf/parsers/yaml v1.1.0
-	github.com/knadh/koanf/providers/file v1.2.0
+	github.com/knadh/koanf/providers/file v1.2.1
 	github.com/knadh/koanf/v2 v2.3.0
 	github.com/mdlayher/ndp v1.1.0
 	github.com/mdlayher/packet v1.1.2
