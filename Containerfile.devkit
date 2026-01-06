@@ -1,7 +1,7 @@
 #
 
 FROM docker.io/golangci/golangci-lint:v2.6.2 AS golangci-lint
-FROM docker.io/library/golang:1.25.4
+FROM docker.io/library/golang:1.25.5
 
 ENV DEBIAN_FRONTEND=noninteractive
 
