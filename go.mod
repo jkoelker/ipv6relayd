@@ -17,9 +17,9 @@ require (
 	github.com/urfave/cli/v3 v3.6.1
 	github.com/vishvananda/netlink v1.3.1
 	github.com/vishvananda/netns v0.0.5
-	golang.org/x/net v0.47.0
+	golang.org/x/net v0.48.0
 	golang.org/x/sync v0.19.0
-	golang.org/x/sys v0.38.0
+	golang.org/x/sys v0.39.0
 	sigs.k8s.io/yaml v1.6.0
 )
 
@@ -57,7 +57,7 @@ require (
 	golang.org/x/arch v0.11.0 // indirect
 	golang.org/x/exp v0.0.0-20250911091902-df9299821621 // indirect
 	golang.org/x/telemetry v0.0.0-20241106142447-58a1122356f5 // indirect
-	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	kernel.org/pub/linux/libs/security/libcap/cap v1.2.76 // indirect
