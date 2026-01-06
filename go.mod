@@ -3,7 +3,7 @@ module github.com/jkoelker/ipv6relayd
 go 1.25.2
 
 require (
-	cunicu.li/gont/v2 v2.12.22
+	cunicu.li/gont/v2 v2.12.26
 	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/insomniacslk/dhcp v0.0.0-20251020182700-175e84fbb167
@@ -55,7 +55,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.3 // indirect
 	golang.org/x/arch v0.11.0 // indirect
-	golang.org/x/exp v0.0.0-20250911091902-df9299821621 // indirect
+	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
 	golang.org/x/telemetry v0.0.0-20241106142447-58a1122356f5 // indirect
 	golang.org/x/text v0.32.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
