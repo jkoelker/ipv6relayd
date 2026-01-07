@@ -151,6 +151,7 @@ type Service struct {
 	linkLocalCache    *netstate.LinkLocalCache
 	ifaceEvents       <-chan ifmon.InterfaceEvent
 	ifaceEventsCancel func()
+	neighSubscribe    neighSubscriber
 }
 
 type targetEntry struct {

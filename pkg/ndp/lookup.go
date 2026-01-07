@@ -9,17 +9,19 @@ import (
 	"github.com/jkoelker/ipv6relayd/pkg/config"
 )
 
-func (s *Service) lookupTargetInterface(target net.IP) (*net.Interface, config.InterfaceConfig, bool) {
+func (s *Service) lookupTargetInterface(target net.IP) (*net.Interface, bool) {
 	addr, ok := netipAddrFromIP(target)
 	if !ok {
-		return nil, config.InterfaceConfig{}, false
+		return nil, false
 	}
 
-	if ifc, cfg, ok := s.lookupDynamicTarget(addr); ok {
-		return ifc, cfg, true
+	if ifc, _, ok := s.lookupDynamicTarget(addr); ok {
+		return ifc, true
 	}
 
-	return s.lookupStaticBinding(addr)
+	ifc, _, ok := s.lookupStaticBinding(addr)
+
+	return ifc, ok
 }
 
 func (s *Service) lookupTargetHostIP(target net.IP) net.IP {
