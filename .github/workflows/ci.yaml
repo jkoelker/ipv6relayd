@@ -76,6 +76,28 @@ jobs:
             exit 1
           fi
 
+  tidy:
+    name: Check go mod tidy
+    needs: devkit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download devkit image
+        uses: actions/download-artifact@v7
+        with:
+          name: devkit-image
+          path: /tmp
+
+      - name: Load devkit image
+        run: docker load -i /tmp/devkit.tar
+
+      - name: Check go mod tidy
+        run: make tidy-ci
+
   unit-tests:
     name: Unit tests
     needs: devkit
@@ -126,6 +148,7 @@ jobs:
     name: Build container image
     needs:
       - lint
+      - tidy
       - unit-tests
       - integration-tests
     runs-on: ubuntu-latest
