@@ -104,6 +104,7 @@ func (s *Service) Run(ctx context.Context) error {
 	s.refreshMonitorState("initial startup", 0, "")
 
 	s.seedTargets(env.upstream, env.downstreams)
+	s.startNeighborMonitor(ctx, env.upstream.Index, env.downstreams)
 
 	s.log.Info(
 		"ndp relay started",
@@ -599,7 +600,7 @@ func (s *Service) handleUpstreamAdvertisement(
 
 	target := addrToIP(msg.TargetAddress)
 	if target != nil {
-		if dst, _, ok := s.lookupTargetInterface(target); ok {
+		if dst, ok := s.lookupTargetInterface(target); ok {
 			if err := s.forwardAdvertisementToDownstream(packetConn, msg, controlMessage, dst); err != nil {
 				s.log.Warn("failed forwarding NA downstream", "iface", dst.Name, "err", err)
 			}
