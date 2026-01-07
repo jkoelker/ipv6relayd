@@ -120,6 +120,11 @@ var (
 	ErrInterfaceManagerRequired = errors.New("interface manager is required")
 )
 
+type neighLister func(linkIndex, family int) ([]netlink.Neigh, error)
+
+//nolint:gochecknoglobals // var for testing
+var neighList neighLister = netlink.NeighList
+
 type Service struct {
 	upstream    config.InterfaceConfig
 	downstreams []config.InterfaceConfig
@@ -420,6 +425,48 @@ func (s *Service) ForEachDownstream(downstreams []*net.Interface, optionHandler 
 	}
 
 	return nil
+}
+
+// seedTargets populates the target cache from the kernel's neighbor table.
+// This allows the relay to pick up existing clients if it starts after they
+// have already completed DAD and address acquisition.
+func (s *Service) seedTargets(upstream *net.Interface, downstreams []*net.Interface) {
+	if s.log != nil {
+		s.log.Info("seeding ndp target cache from neighbor table")
+	}
+
+	validStates := netlink.NUD_REACHABLE | netlink.NUD_STALE |
+		netlink.NUD_DELAY | netlink.NUD_PROBE | netlink.NUD_PERMANENT
+
+	for _, downstream := range downstreams {
+		neighs, err := neighList(downstream.Index, netlink.FAMILY_V6)
+		if err != nil {
+			if s.log != nil {
+				s.log.Warn("failed to list neighbors for seeding", "iface", downstream.Name, "err", err)
+			}
+
+			continue
+		}
+
+		for _, neigh := range neighs {
+			if neigh.State&validStates == 0 {
+				continue
+			}
+
+			if neigh.IP == nil || !neigh.IP.IsGlobalUnicast() {
+				continue
+			}
+
+			if s.log != nil {
+				s.log.Debug("seeding target from neighbor table", "target", neigh.IP, "iface", downstream.Name)
+			}
+
+			// We pass nil for hostIP and packetConn because we are not
+			// reacting to a packet, just learning the route. trackTarget
+			// handles nil packetConn gracefully (it just skips the immediate unicast probe).
+			s.trackTarget(neigh.IP, nil, downstream, upstream, nil)
+		}
+	}
 }
 
 func (s *Service) setupHintManager() {

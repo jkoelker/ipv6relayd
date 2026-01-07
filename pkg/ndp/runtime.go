@@ -103,6 +103,8 @@ func (s *Service) Run(ctx context.Context) error {
 	// Flush cached interface state immediately so startup does not depend on netlink bursts.
 	s.refreshMonitorState("initial startup", 0, "")
 
+	s.seedTargets(env.upstream, env.downstreams)
+
 	s.log.Info(
 		"ndp relay started",
 		"upstream", env.upstream.Name,

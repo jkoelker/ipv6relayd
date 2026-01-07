@@ -38,13 +38,12 @@ func (s *Service) shouldTrackTarget(
 	target net.IP,
 	downstream *net.Interface,
 	upstream *net.Interface,
-	packetConn *ipv6.PacketConn,
+	_ *ipv6.PacketConn,
 ) bool {
 	return target != nil &&
 		!target.IsLinkLocalUnicast() &&
 		downstream != nil &&
-		upstream != nil &&
-		packetConn != nil
+		upstream != nil
 }
 
 func (s *Service) recordTargetEntry(target net.IP, hostIP net.IP, downstream *net.Interface) bool {
