@@ -120,6 +120,11 @@ var (
 	ErrInterfaceManagerRequired = errors.New("interface manager is required")
 )
 
+type neighLister func(linkIndex, family int) ([]netlink.Neigh, error)
+
+//nolint:gochecknoglobals // var for testing
+var neighList neighLister = netlink.NeighList
+
 type Service struct {
 	upstream    config.InterfaceConfig
 	downstreams []config.InterfaceConfig
@@ -404,6 +409,24 @@ func (s *Service) SeedTargetCache(target net.IP, hostIP net.IP, iface string) {
 	})
 }
 
+// ForEachDownstream invokes optionHandler for every downstream interface, returning the first error encountered.
+func (s *Service) ForEachDownstream(downstreams []*net.Interface, optionHandler func(*net.Interface) error) error {
+	var firstErr error
+
+	for _, downstream := range downstreams {
+		if err := optionHandler(downstream); err != nil && firstErr == nil {
+			firstErr = err
+		}
+	}
+
+	if firstErr != nil {
+
+		return fmt.Errorf("refresh multicast: %w", firstErr)
+	}
+
+	return nil
+}
+
 // seedTargets populates the target cache from the kernel's neighbor table.
 // This allows the relay to pick up existing clients if it starts after they
 // have already completed DAD and address acquisition.
@@ -412,14 +435,16 @@ func (s *Service) seedTargets(upstream *net.Interface, downstreams []*net.Interf
 		s.log.Info("seeding ndp target cache from neighbor table")
 	}
 
-	validStates := netlink.NUD_REACHABLE | netlink.NUD_STALE | netlink.NUD_DELAY | netlink.NUD_PROBE | netlink.NUD_PERMANENT
+	validStates := netlink.NUD_REACHABLE | netlink.NUD_STALE |
+		netlink.NUD_DELAY | netlink.NUD_PROBE | netlink.NUD_PERMANENT
 
 	for _, downstream := range downstreams {
-		neighs, err := netlink.NeighList(downstream.Index, netlink.FAMILY_V6)
+		neighs, err := neighList(downstream.Index, netlink.FAMILY_V6)
 		if err != nil {
 			if s.log != nil {
 				s.log.Warn("failed to list neighbors for seeding", "iface", downstream.Name, "err", err)
 			}
+
 			continue
 		}
 
@@ -442,24 +467,6 @@ func (s *Service) seedTargets(upstream *net.Interface, downstreams []*net.Interf
 			s.trackTarget(neigh.IP, nil, downstream, upstream, nil)
 		}
 	}
-}
-
-// ForEachDownstream invokes optionHandler for every downstream interface, returning the first error encountered.
-func (s *Service) ForEachDownstream(downstreams []*net.Interface, optionHandler func(*net.Interface) error) error {
-	var firstErr error
-
-	for _, downstream := range downstreams {
-		if err := optionHandler(downstream); err != nil && firstErr == nil {
-			firstErr = err
-		}
-	}
-
-	if firstErr != nil {
-
-		return fmt.Errorf("refresh multicast: %w", firstErr)
-	}
-
-	return nil
 }
 
 func (s *Service) setupHintManager() {
