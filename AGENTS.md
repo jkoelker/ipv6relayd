@@ -173,5 +173,5 @@ The `.golangci.yaml` enables nearly all linters. Key settings:
 
 ## Notes
 
-- Go 1.24+ is used; there is no "loop variable captured by reference" issue in range loops.
-- The project uses Go modules; run `go mod tidy` after dependency changes.
+- Go 1.25+ is used; there is no "loop variable captured by reference" issue in range loops.
+- The project uses Go modules; run `make tidy` after dependency changes.
