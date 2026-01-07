@@ -90,6 +90,37 @@ clean-devkit:
 .PHONY: clean
 clean: clean-devkit
 
+.PHONY: run
+run: devkit-image
+ifndef WHAT
+	$(error WHAT is required, e.g. make run WHAT="go test -v ./pkg/config/...")
+else
+	$(call container,run,$(DEVKIT_ARGS) $(DEVKIT_IMAGE) $(WHAT))
+endif
+
+go.sum: go.mod
+	go mod tidy -v
+
+.PHONY: tidy
+tidy: devkit-image
+	$(call container,run,$(DEVKIT_ARGS) $(DEVKIT_IMAGE) make go.sum)
+
+.PHONY: check-tidy
+check-tidy:
+	@echo "Check Go Modules"
+	@if ! git diff --quiet go.mod go.sum; then \
+		echo -e "\n\n*****************************************"; \
+		echo "'go.mod' and/or 'go.sum' are out of date."; \
+		echo "Please run 'make tidy' to update them."; \
+		echo -e "*****************************************\n\n"; \
+		exit 1; \
+	fi
+
+.PHONY: tidy-ci
+tidy-ci: devkit-image
+	$(call container,run,$(DEVKIT_ARGS) $(DEVKIT_IMAGE) make go.sum)
+	$(MAKE) check-tidy
+
 .PHONY: integration
 integration: devkit-image
 	@cid=$$($(call container,run,-d --privileged --cap-add=NET_ADMIN --cap-add=NET_RAW --device /dev/net/tun $(DEVKIT_CGROUP_FLAG) --tmpfs /run --tmpfs /tmp $(if $(CGROUP_MOUNT),$(CGROUP_MOUNT)) $(WORKSPACE_MOUNT) -- $(DEVKIT_IMAGE) /lib/systemd/systemd)); \
