@@ -4,7 +4,7 @@ go 1.25.2
 
 require (
 	cunicu.li/gont/v2 v2.12.26
-	github.com/go-viper/mapstructure/v2 v2.4.0
+	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/insomniacslk/dhcp v0.0.0-20251020182700-175e84fbb167
 	github.com/knadh/koanf/parsers/json v1.0.0
