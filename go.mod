@@ -14,7 +14,7 @@ require (
 	github.com/mdlayher/ndp v1.1.0
 	github.com/mdlayher/packet v1.1.2
 	github.com/stretchr/testify v1.11.1
-	github.com/urfave/cli/v3 v3.6.1
+	github.com/urfave/cli/v3 v3.6.2
 	github.com/vishvananda/netlink v1.3.1
 	github.com/vishvananda/netns v0.0.5
 	golang.org/x/net v0.48.0
