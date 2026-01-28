@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags="-s -w" -o /out/ipv6relayd ./cmd/ipv6relayd
 
-FROM docker.io/library/alpine:3.23.2
+FROM docker.io/library/alpine:3.23.3
 
 WORKDIR /
 
