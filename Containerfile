@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.20
 
-FROM docker.io/library/golang:1.25.5 AS builder
+FROM docker.io/library/golang:1.26.0 AS builder
 
 WORKDIR /src
 ENV CGO_ENABLED=0
